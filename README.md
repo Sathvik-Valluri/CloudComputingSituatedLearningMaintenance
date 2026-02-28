@@ -44,9 +44,15 @@ The solution is a 100% serverless architecture built on AWS to ensure zero idle 
 ## 6. Testing & Performance Measurement
 * **CRUD Verification:** Successfully tested Create (Operator POST), Read (Technician GET), Update (Technician PUT + SNS Trigger), and Delete (Technician DELETE + S3 Cleanup).
 * **Latency:** AWS CloudWatch metrics indicate Lambda cold starts average ~800ms, while warm invocations execute in **< 250ms**, providing a near-instantaneous experience for the end user.
-* **Payload Handling:** Base64 image encoding successfully transmitted via API Gateway payload v2 without truncation.
 
-## 7. Future Work
+## 7. Challenges & Resolutions (Lessons Learned)
+During the development and integration phases, several cloud-specific challenges were identified and resolved:
+1. **IAM Permission Denials:** Lambda initially failed to write to DynamoDB. *Resolution:* Traced the `AccessDeniedException` and attached explicit IAM execution roles for DynamoDB, S3, and SNS.
+2. **CORS and Preflight (OPTIONS) Failures:** Browsers blocked the connection from the local testing environment to API Gateway. *Resolution:* Configured API Gateway to accept `*` origins and updated the Lambda Python script to explicitly return a `200 OK` status for preflight `OPTIONS` requests.
+3. **SNS Protocol Limitations:** Initially created a FIFO (First-In-First-Out) SNS topic, which does not support Email protocols. *Resolution:* Re-architected the topic to a "Standard" SNS topic to allow direct-to-email technician alerts.
+4. **API Gateway 10MB Payload Limit:** Uploading high-resolution smartphone images (which bloat by 33% when Base64 encoded) caused catastrophic API Gateway connection timeouts and 502 errors. *Resolution:* Shifted the compute load to the client-side. Implemented an HTML5 Canvas Javascript function in the frontend to automatically compress and resize images to <500KB *before* transmission to AWS, bypassing the limit and dramatically improving upload speeds.
+
+## 8. Future Work
 * **Authentication:** Implement Amazon Cognito User Pools to enforce strict Operator vs. Technician access controls.
 * **Predictive Analytics:** Export DynamoDB data to AWS Glue and Athena to identify equipment with the highest failure rates.
 * **Automated Dispatch:** Integrate AWS Step Functions to automatically page the nearest available technician based on aircraft program.
