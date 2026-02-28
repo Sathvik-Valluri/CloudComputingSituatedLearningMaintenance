@@ -1,8 +1,8 @@
-# CloudComputingSituatedLearningMaintenance
+# CloudComputingSituatedLearningMaintenance - College Assignment
 Large Manufacturing Plants face frequent equipment breakdowns. Maintenance teams handle requests manually causing delays. 
 This system aims to digitize maintenance request handling
 
-# Serverless Smart Maintenance Request Management System (SMRMS)
+# Serverless Smart Maintenance Request Management System (SMRMS) - Airbus College Assignment
 
 ## 1. Initial Problem Statement
 Large manufacturing plants and aviation maintenance facilities face frequent equipment breakdowns. Currently, maintenance teams handle requests manually using paper forms or unencrypted emails. This results in:
