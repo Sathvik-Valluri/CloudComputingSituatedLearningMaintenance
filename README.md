@@ -43,7 +43,7 @@ The solution is a 100% serverless architecture built on AWS to ensure zero idle 
 
 ## 6. Testing & Performance Measurement
 * **CRUD Verification:** Successfully tested Create (Operator POST), Read (Technician GET), Update (Technician PUT + SNS Trigger), and Delete (Technician DELETE + S3 Cleanup).
-* **Latency:** AWS CloudWatch metrics indicate Lambda cold starts average ~800ms, while warm invocations execute in **< 150ms**, providing a near-instantaneous experience for the end user.
+* **Latency:** AWS CloudWatch metrics indicate Lambda cold starts average ~800ms, while warm invocations execute in **< 250ms**, providing a near-instantaneous experience for the end user.
 * **Payload Handling:** Base64 image encoding successfully transmitted via API Gateway payload v2 without truncation.
 
 ## 7. Future Work
