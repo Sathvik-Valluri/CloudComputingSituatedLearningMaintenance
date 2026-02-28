@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMRMS | Smart Maintenance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #0f172a; --secondary: #3b82f6; --bg: #f8fafc; --card: #ffffff; --text: #334155; --danger: #ef4444; --warning: #f59e0b; --success: #10b981; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        .navbar { background: var(--primary); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .navbar h1 { margin: 0; font-size: 1.2rem; letter-spacing: 1px; }
+        .nav-btn { background: transparent; border: 1px solid white; color: white; padding: 8px 15px; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+        .nav-btn:hover { background: white; color: var(--primary); }
+        
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .card { background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+        h2 { color: var(--primary); margin-top: 0; }
+        
+        /* Form Styling */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group.full-width { grid-column: span 2; }
+        label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; color: var(--primary); }
+        input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Inter', sans-serif; box-sizing: border-box; transition: border 0.3s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--secondary); outline: none; }
+        
+        button.primary-btn { background: var(--secondary); color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; font-size: 1rem; margin-top: 15px; transition: 0.3s;}
+        button.primary-btn:hover { background: #2563eb; }
+        button:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        /* Login Screen */
+        .role-selection { display: flex; gap: 20px; justify-content: center; margin-top: 30px; }
+        .role-card { flex: 1; text-align: center; padding: 40px 20px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: 0.3s; font-weight: 600; color: var(--primary); background: white;}
+        .role-card:hover { border-color: var(--secondary); background: #eff6ff; }
+
+        /* Tickets Dashboard */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+        .ticket-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .ticket-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-top: 5px solid #cbd5e1; display: flex; flex-direction: column; justify-content: space-between;}
+        
+        /* Priority Colors */
+        .priority-Critical { border-top-color: var(--danger); }
+        .priority-High { border-top-color: #f97316; }
+        .priority-Medium { border-top-color: var(--warning); }
+        .priority-Low { border-top-color: var(--success); }
+        
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; background: #f1f5f9; color: #475569; }
+        .ticket-image { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin: 10px 0; border: 1px solid #e2e8f0; }
+        
+        .actions-box { background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #e2e8f0; }
+        .actions-box select { margin-bottom: 10px; }
+        .email-toggle { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; margin-bottom: 10px; color: var(--text); }
+        .btn-update { background: var(--success); color: white; border: none; padding: 8px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: 600; margin-bottom: 5px;}
+        .btn-delete { background: white; color: var(--danger); border: 1px solid var(--danger); padding: 8px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: 600;}
+
+        #operator-view, #technician-view, #loading { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h1> AIRBUS | Industrial Smart Maintenance Request Management System </h1>
+    <button class="nav-btn" onclick="logout()" id="logoutBtn" style="display:none;">Switch Role</button>
+</div>
+
+<div class="container">
+    
+    <div id="login-view">
+        <h2 style="text-align: center;">Select Portal Interface</h2>
+        <div class="role-selection">
+            <div class="role-card" onclick="setRole('operator')">
+                <span style="font-size: 2rem;">👷</span><br><br>Machine Operator
+            </div>
+            <div class="role-card" onclick="setRole('technician')">
+                <span style="font-size: 2rem;">🔧</span><br><br>Maintenance Technician
+            </div>
+        </div>
+    </div>
+
+    <div id="operator-view" class="card">
+        <h2>Submit New Request</h2>
+        <form id="requestForm" onsubmit="submitRequest(event)">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Aircraft Program</label>
+                    <select id="aircraftProgram" required>
+                        <option value="A320 Family">A320 Family</option>
+                        <option value="A330">A330</option>
+                        <option value="A350-900">A350-900</option>
+                        <option value="A350-1000">A350-1000</option>
+                        <option value="A380">A380</option>
+                        <option value="A400M">A400M</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Equipment Type</label>
+                    <select id="eqType" required>
+                        <option value="Machine">Machine</option>
+                        <option value="Tool">Tool</option>
+                        <option value="Support Equipment">Support Eq.</option>
+                        <option value="Jig">Jig</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Equipment ID (e.g. Lathe-04)</label>
+                    <input type="text" id="eqId" required>
+                </div>
+                <div class="form-group">
+                    <label>Priority Level</label>
+                    <select id="priority" required>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                        <option value="Critical">Critical (AOG)</option>
+                    </select>
+                </div>
+                <div class="form-group full-width">
+                    <label>Issue Description</label>
+                    <textarea id="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label>Upload Photo (Optional)</label>
+                    <input type="file" id="imageFile" accept="image/*" style="background: #f8fafc;">
+                </div>
+            </div>
+            <button type="submit" id="submitBtn" class="primary-btn">Submit Request to Tech Desk</button>
+        </form>
+    </div>
+
+    <div id="technician-view">
+        <div class="dashboard-header">
+            <div>
+                <h2>Active Board</h2>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <label style="margin: 0;">Program Filter:</label>
+                    <select id="techProgramFilter" onchange="fetchTickets()" style="width: auto; padding: 5px;">
+                        <option value="ALL">All Programs</option>
+                        <option value="A320 Family">A320 Family</option>
+                        <option value="A330">A330</option>
+                        <option value="A350-900">A350-900</option>
+                        <option value="A350-1000">A350-1000</option>
+                        <option value="A380">A380</option>
+                        <option value="A400M">A400M</option>
+                    </select>
+                </div>
+            </div>
+            <button class="nav-btn" style="color: var(--primary); border-color: var(--primary);" onclick="fetchTickets()">🔄 Refresh </button>
+        </div>
+        <div id="tickets-container" class="ticket-grid"></div>
+    </div>
+
+</div>
+
+<script>
+    // --- IMPORTANT: Enter your API Gateway Invoke URL  ---
+    const API_URL = 'https://dtw21v7s22.execute-api.us-east-1.amazonaws.com/Prod/MaintenanceSystemBackend';
+	//const API_URL = 'https://dtw21v7s22.execute-api.us-east-1.amazonaws.com/default/MaintenanceSystemBackend';  
+
+    function setRole(role) {
+        document.getElementById('login-view').style.display = 'none';
+        document.getElementById('logoutBtn').style.display = 'block';
+        if (role === 'operator') document.getElementById('operator-view').style.display = 'block';
+        else if (role === 'technician') {
+            document.getElementById('technician-view').style.display = 'block';
+            fetchTickets();
+        }
+    }
+
+    function logout() {
+        document.getElementById('operator-view').style.display = 'none';
+        document.getElementById('technician-view').style.display = 'none';
+        document.getElementById('logoutBtn').style.display = 'none';
+        document.getElementById('login-view').style.display = 'block';
+    }
+
+    function getBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    async function submitRequest(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.innerText = 'Uploading to Cloud...';
+        btn.disabled = true;
+
+        const fileInput = document.getElementById('imageFile');
+        let base64String = null;
+        if (fileInput.files.length > 0) base64String = await getBase64(fileInput.files[0]);
+
+        const payload = {
+            aircraftProgram: document.getElementById('aircraftProgram').value,
+            equipmentType: document.getElementById('eqType').value,
+            equipmentId: document.getElementById('eqId').value,
+            priority: document.getElementById('priority').value,
+            description: document.getElementById('description').value,
+            imageBase64: base64String 
+        };
+
+        try {
+            const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json' }});
+            if (response.ok) {
+                alert('Success: Request logged securely in DynamoDB.');
+                document.getElementById('requestForm').reset();
+            } else alert('Failed to submit request.');
+        } catch (error) {
+            alert('Connection Error. Check API Gateway.');
+        } finally {
+            btn.innerText = 'Submit Request to Tech Desk';
+            btn.disabled = false;
+        }
+    }
+
+    async function fetchTickets() {
+        const container = document.getElementById('tickets-container');
+        container.innerHTML = '<p>Loading live data from AWS...</p>';
+        try {
+            const response = await fetch(API_URL, { method: 'GET' });
+            const tickets = await response.json();
+            renderTickets(tickets);
+        } catch (error) {
+            container.innerHTML = '<p style="color:red;">Failed to connect to AWS Backend.</p>';
+        }
+    }
+
+    
+	function renderTickets(tickets) {
+        const container = document.getElementById('tickets-container');
+        const filterValue = document.getElementById('techProgramFilter').value;
+        container.innerHTML = '';
+
+        const filteredTickets = tickets.filter(t => filterValue === 'ALL' || t.aircraftProgram === filterValue);
+        if (filteredTickets.length === 0) return container.innerHTML = '<p>No open tickets for this filter.</p>';
+
+        filteredTickets.forEach(ticket => {
+            const div = document.createElement('div');
+            div.className = `ticket-card priority-${ticket.priority}`;
+            const imageHtml = ticket.imageUrl ? `<img src="${ticket.imageUrl}" class="ticket-image" alt="Evidence">` : '';
+
+            div.innerHTML = `
+                <div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span class="badge">${ticket.aircraftProgram}</span>
+                        <span class="badge" style="background:#e0f2fe; color:#0369a1;">${ticket.status}</span>
+                    </div>
+                    <h3 style="margin:0 0 5px 0; font-size:1.1rem;">${ticket.equipmentId}</h3>
+                    <p style="margin:0 0 10px 0; font-size:0.85rem; color:#64748b;">${ticket.equipmentType} | Priority: <strong>${ticket.priority}</strong></p>
+                    <p style="font-size:0.95rem; line-height:1.4;">"${ticket.description}"</p>
+                    ${imageHtml}
+                </div>
+                <div class="actions-box">
+                    <select id="status-${ticket.ticketId}" onchange="toggleEmailCheckbox('${ticket.ticketId}')">
+                        <option value="Pending" ${ticket.status === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
+                        <option value="In Progress" ${ticket.status === 'In Progress' ? 'selected' : ''}>🛠️ In Progress</option>
+                        <option value="Complete" ${ticket.status === 'Complete' ? 'selected' : ''}>✅ Complete</option>
+                    </select>
+                    
+                    <div class="email-toggle" id="emailWrapper-${ticket.ticketId}" style="display: none;">
+                        <input type="checkbox" id="email-${ticket.ticketId}">
+                        <label for="email-${ticket.ticketId}">Notify operator on completion</label>
+                    </div>
+                    
+                    <button class="btn-update" onclick="updateStatus('${ticket.ticketId}')">Save Changes</button>
+                    <button class="btn-delete" onclick="deleteTicket('${ticket.ticketId}')">Delete Record</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+	
+	function toggleEmailCheckbox(ticketId) {
+        const statusDropdown = document.getElementById(`status-${ticketId}`);
+        const emailWrapper = document.getElementById(`emailWrapper-${ticketId}`);
+        
+        // Only show the checkbox if the selected status is "Complete"
+        if (statusDropdown.value === 'Complete') {
+            emailWrapper.style.display = 'flex'; // Use flex to keep the layout nice
+        } else {
+            emailWrapper.style.display = 'none';
+            // Uncheck the box if they change their mind and switch back to Pending
+            document.getElementById(`email-${ticketId}`).checked = false; 
+        }
+    }
+	
+    async function updateStatus(ticketId) {
+        const newStatus = document.getElementById(`status-${ticketId}`).value;
+        const sendEmail = document.getElementById(`email-${ticketId}`).checked;
+        
+        try {
+            await fetch(API_URL, {
+                method: 'PUT',
+                body: JSON.stringify({ ticketId: ticketId, status: newStatus, sendEmail: sendEmail }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            alert('Record updated in DynamoDB.');
+            fetchTickets(); 
+        } catch (error) { alert('Update failed.'); }
+    }
+
+    async function deleteTicket(ticketId) {
+        if (!confirm('Permanently delete this record?')) return;
+        try {
+            await fetch(API_URL, { method: 'DELETE', body: JSON.stringify({ ticketId: ticketId }), headers: { 'Content-Type': 'application/json' }});
+            fetchTickets(); 
+        } catch (error) { alert('Delete failed.'); }
+    }
+</script>
+</body>
+</html>
