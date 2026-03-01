@@ -28,7 +28,7 @@ The solution is a 100% serverless architecture built on AWS to ensure zero idle 
 
 **Key Design Decisions:**
 1. **Cost Optimization:** By dropping heavy frameworks and utilizing AWS Free Tier services exclusively, the operational cost is $0.
-2. **Storage Efficiency:** To bypass DynamoDB's 400KB item limit, images are routed to S3, and only the S3 Object Key is stored in the database. Furthermore, Lambda is programmed to automatically delete images from S3 when a ticket is marked "Complete," drastically reducing storage bloat.
+2. **Storage Efficiency:** To bypass DynamoDB's 400KB item limit, images are routed to S3, and only the S3 Object Key is stored in the database. Furthermore, Lambda is programmed to automatically delete images from S3 when a ticket is "Deleted," drastically reducing storage bloat.
 
 ## 4. Implementation Steps
 1. **DynamoDB:** Created table `MaintenanceRequests` with Partition Key `ticketId`.
