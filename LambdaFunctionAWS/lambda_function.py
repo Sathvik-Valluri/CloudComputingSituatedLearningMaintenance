@@ -123,16 +123,16 @@ def lambda_handler(event, context):
             new_status = body['status']
             send_email = body.get('sendEmail', False)
             
-            # Fetch the existing ticket to see if it has an image attached
-            existing_item = table.get_item(Key={'ticketId': ticket_id}).get('Item', {})
+            # # Fetch the existing ticket to see if it has an image attached
+            # existing_item = table.get_item(Key={'ticketId': ticket_id}).get('Item', {})
 
-            # --- Space Saving Logic ---
-            # If the ticket is marked 'Complete', we delete the heavy image from S3 to save storage costs.
-            if new_status == 'Complete' and 'imageKey' in existing_item:
-                try:
-                    s3.delete_object(Bucket=BUCKET_NAME, Key=existing_item['imageKey'])
-                except Exception as e:
-                    print(f"S3 Delete Error: {e}")
+            # # --- Space Saving Logic ---
+            # # If the ticket is marked 'Complete', we delete the heavy image from S3 to save storage costs.
+            # if new_status == 'Complete' and 'imageKey' in existing_item:
+            #     try:
+            #         s3.delete_object(Bucket=BUCKET_NAME, Key=existing_item['imageKey'])
+            #     except Exception as e:
+            #         print(f"S3 Delete Error: {e}")
             
             # --- SNS Email Trigger ---
             # If the technician checked the "Notify Operator" box AND marked it Complete, send an email.
